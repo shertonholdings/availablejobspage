@@ -43,8 +43,9 @@
             document.getElementById('current-datetime').textContent = `${formattedDate}, ${formattedTime}`;
         }
 
+        // Function to fetch and display jobs from Gist
         async function fetchGistData() {
-            const gistId = '9526ff124bc34bccf81664398b668a8a';  // Your Gist ID for available jobs
+            const gistId = '9526ff124bc34bccf81664398b668a8a';  // Your Gist ID for job details
             const url = `https://api.github.com/gists/${gistId}`;
 
             try {
@@ -79,31 +80,38 @@
             }
         }
 
+        // Function to check authorization
         async function checkAuthorization() {
             const urlParams = new URLSearchParams(window.location.search);
             const email = urlParams.get('email');
+
             if (!email) {
                 // No email parameter, redirect to login page
                 window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
                 return;
             }
 
-            const gistId = 'bebbb55c9f86cb1180a5ed7aaa64fce4'; // Your Gist ID for user emails
+            const gistId = 'bebbb55c9f86cb1180a5ed7aaa64fce4';  // Gist ID for user data
             const gistUrl = `https://api.github.com/gists/${gistId}`;
 
             try {
                 const response = await fetch(gistUrl);
                 const data = await response.json();
-                const content = JSON.parse(data.files['user_data.json'].content); // Parse JSON content
-                const emailList = content.map(user => user.email); // Extract emails
 
-                if (!emailList.includes(email)) {
+                // Access and parse the user_data.json file
+                const content = JSON.parse(data.files['user_data.json'].content);
+
+                // Check if the email exists in the JSON structure
+                const user = content.find(user => user.email === email);
+
+                if (!user) {
                     // Email not found, redirect to login page
                     window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
                 } else {
-                    // Email found, proceed with loading job data
+                    // Email found, proceed with loading the page
+                    console.log(`Authorized: ${user.first_name} ${user.last_name}`);
                     updateDateTime();
-                    fetchGistData();
+                    fetchGistData();  // Load job data if authorization is successful
                 }
             } catch (error) {
                 console.error('Error checking authorization:', error);
@@ -111,7 +119,7 @@
             }
         }
 
-        // Check authorization when the page loads
+        // Check authorization on page load
         checkAuthorization();
     </script>
 </body>
