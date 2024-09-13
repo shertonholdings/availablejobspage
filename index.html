@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Jobs</title>
+    <style>
+        .timestamp {
+            color: darkgreen;
+        }
+        .chat-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .chat-button:hover {
+            background-color: #128C7E;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="page-title">Available Jobs as at <span class="timestamp" id="current-datetime"></span></h1>
+    <div id="jobs-list"></div>
+
+    <script>
+        // Function to format the date as DD/MM/YYYY
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Function to update the heading with the current date and time
+        function updateDateTime() {
+            const now = new Date();
+            const formattedDate = formatDate(now);  // Format the date
+            const formattedTime = now.toLocaleTimeString(); // Get the time
+            document.getElementById('current-datetime').textContent = `${formattedDate}, ${formattedTime}`;
+        }
+
+        async function fetchGistData() {
+            const gistId = '9526ff124bc34bccf81664398b668a8a';  // Your Gist ID
+            const url = `https://api.github.com/gists/${gistId}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const jobDetails = JSON.parse(data.files['available_jobs.json'].content);
+
+                // Display the job details
+                let jobListHtml = '<ul>';
+                jobDetails.forEach(job => {
+                    const timePosted = new Date(job.timestamp);
+                    const formattedTimestamp = formatDate(timePosted) + ', ' + timePosted.toLocaleTimeString();
+                    const phoneInternational = job.phone.replace(/^0/, '254'); // Convert Kenyan numbers to international format
+
+                    jobListHtml += `<li>
+                        <strong>Job Title:</strong> ${job.job_title}<br>
+                        <strong>Job Description:</strong> ${job.job_description}<br>
+                        <strong>Expected Hours:</strong> ${job.expected_hours}<br>
+                        <strong>City:</strong> ${job.city}<br>
+                        <strong>Town:</strong> ${job.town}<br>
+                        <strong>Street:</strong> ${job.street}<br>
+                        <strong>Estate/Building Name:</strong> ${job.estate_or_building_name}<br>
+                        <strong>Contact:</strong> ${job.phone}<br>
+                        <strong>Time Posted:</strong> ${formattedTimestamp}<br>
+                        <button class="chat-button" onclick="window.open('https://wa.me/${phoneInternational}', '_blank')">Chat Now</button>
+                    </li><hr>`;
+                });
+                jobListHtml += '</ul>';
+                document.getElementById('jobs-list').innerHTML = jobListHtml;
+            } catch (error) {
+                console.error('Error fetching Gist data:', error);
+            }
+        }
+
+        // Call the functions to fetch the data and update the heading
+        updateDateTime();
+        fetchGistData();
+    </script>
+</body>
+</html>
