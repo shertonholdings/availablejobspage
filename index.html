@@ -44,7 +44,7 @@
         }
 
         async function fetchGistData() {
-            const gistId = '9526ff124bc34bccf81664398b668a8a';  // Your Gist ID
+            const gistId = '9526ff124bc34bccf81664398b668a8a';  // Your Gist ID for available jobs
             const url = `https://api.github.com/gists/${gistId}`;
 
             try {
@@ -79,9 +79,40 @@
             }
         }
 
-        // Call the functions to fetch the data and update the heading
-        updateDateTime();
-        fetchGistData();
+        async function checkAuthorization() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            if (!email) {
+                // No email parameter, redirect to login page
+                window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
+                return;
+            }
+
+            const gistId = 'bebbb55c9f86cb1180a5ed7aaa64fce4'; // Your Gist ID for user emails
+            const gistUrl = `https://api.github.com/gists/${gistId}`;
+
+            try {
+                const response = await fetch(gistUrl);
+                const data = await response.json();
+                const content = JSON.parse(data.files['user_data.json'].content); // Parse JSON content
+                const emailList = content.map(user => user.email); // Extract emails
+
+                if (!emailList.includes(email)) {
+                    // Email not found, redirect to login page
+                    window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
+                } else {
+                    // Email found, proceed with loading job data
+                    updateDateTime();
+                    fetchGistData();
+                }
+            } catch (error) {
+                console.error('Error checking authorization:', error);
+                window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
+            }
+        }
+
+        // Check authorization when the page loads
+        checkAuthorization();
     </script>
 </body>
 </html>
