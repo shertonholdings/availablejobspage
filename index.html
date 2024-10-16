@@ -21,8 +21,8 @@
             background-color: #128C7E;
         }
         .map {
-            height: 300px;
-            width: 100%;
+            height: 300px; /* Set height of the map */
+            width: 100%; /* Set width of the map */
             margin-top: 10px;
         }
     </style>
@@ -49,24 +49,32 @@
             document.getElementById('current-datetime').textContent = `${formattedDate}, ${formattedTime}`;
         }
 
+        // Function to fetch job groups from Gist
+        async function fetchJobGroups() {
+            const gistId = '3ee629f23be937756d7430ed4c646423'; // Your jobgroups.json Gist ID
+            const url = `https://api.github.com/gists/${gistId}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return JSON.parse(data.files['jobgroups.json'].content);
+            } catch (error) {
+                console.error('Error fetching job groups:', error);
+                return {};
+            }
+        }
+
         // Function to fetch and display jobs from Gist
         async function fetchGistData() {
-            const gistId = '9526ff124bc34bccf81664398b668a8a'; // Jobs Gist
+            const gistId = '9526ff124bc34bccf81664398b668a8a';
             const url = `https://api.github.com/gists/${gistId}`;
-            
-            // Fetch the job groups and hourly rates from the Gist
-            const jobGroupsGistId = '3ee629f23be937756d7430ed4c646423'; // Your jobgroups.json Gist ID
-            const jobGroupsUrl = `https://api.github.com/gists/${jobGroupsGistId}`;
+
+            const jobGroups = await fetchJobGroups(); // Fetch job groups
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 const jobDetails = JSON.parse(data.files['available_jobs.json'].content);
-
-                // Fetch job group rates
-                const jobGroupsResponse = await fetch(jobGroupsUrl);
-                const jobGroupsData = await jobGroupsResponse.json();
-                const jobGroups = JSON.parse(jobGroupsData.files['jobgroups.json'].content);
 
                 // Display the job details
                 let jobListHtml = '<ul>';
@@ -76,11 +84,11 @@
                     const phoneInternational = job.phone.replace(/^0/, '254');
 
                     // Get the hourly rate based on the job group
-                    const hourlyRate = jobGroups[job.job_group] || 0; // If no matching job group, default to 0
+                    const hourlyRate = jobGroups[job.job_title] || 0; // Use job.job_title for lookup
                     const totalPayment = hourlyRate * job.expected_hours;
 
                     jobListHtml += `<li>
-                        <strong>Job Title:</strong> ${job.job_title}<br>
+                        <strong>Job Group:</strong> ${job.job_title}<br> <!-- Updated to show Job Group -->
                         <strong>Job Description:</strong> ${job.job_description}<br>
                         <strong>Expected Hours:</strong> ${job.expected_hours}<br>
                         <strong>Total Payment:</strong> ${totalPayment.toFixed(2)}<br> <!-- Display Total Payment -->
