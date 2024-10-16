@@ -49,27 +49,28 @@
             document.getElementById('current-datetime').textContent = `${formattedDate}, ${formattedTime}`;
         }
 
+        // Variable to store job groups and their hourly rates
+        let jobGroups = {};
+
         // Function to fetch job groups from Gist
         async function fetchJobGroups() {
-            const gistId = '3ee629f23be937756d7430ed4c646423'; // Your jobgroups.json Gist ID
+            const gistId = '3ee629f23be937756d7430ed4c646423'; // Your job groups gist ID
             const url = `https://api.github.com/gists/${gistId}`;
 
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                return JSON.parse(data.files['jobgroups.json'].content);
+                jobGroups = JSON.parse(data.files['jobgroups.json'].content); // Adjust the file name if needed
             } catch (error) {
                 console.error('Error fetching job groups:', error);
-                return {};
             }
         }
 
         // Function to fetch and display jobs from Gist
         async function fetchGistData() {
-            const gistId = '9526ff124bc34bccf81664398b668a8a';
+            await fetchJobGroups(); // Fetch job groups first
+            const gistId = '9526ff124bc34bccf81664398b668a8a'; // Your available jobs gist ID
             const url = `https://api.github.com/gists/${gistId}`;
-
-            const jobGroups = await fetchJobGroups(); // Fetch job groups
 
             try {
                 const response = await fetch(url);
@@ -83,7 +84,7 @@
                     const formattedTimestamp = formatDate(timePosted) + ', ' + timePosted.toLocaleTimeString();
                     const phoneInternational = job.phone.replace(/^0/, '254');
 
-                    // Get the hourly rate based on the job group
+                    // Get the hourly rate based on the job title (which is now the job group)
                     const hourlyRate = jobGroups[job.job_title] || 0; // Use job.job_title for lookup
                     const totalPayment = hourlyRate * job.expected_hours;
 
@@ -129,7 +130,7 @@
                 return;
             }
 
-            const gistId = 'bebbb55c9f86cb1180a5ed7aaa64fce4';
+            const gistId = 'bebbb55c9f86cb1180a5ed7aaa64fce4'; // Your user data gist ID
             const gistUrl = `https://api.github.com/gists/${gistId}`;
 
             try {
