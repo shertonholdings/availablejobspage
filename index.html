@@ -20,17 +20,17 @@
         .chat-button:hover {
             background-color: #128C7E;
         }
-        #map {
-            height: 500px; /* Set height of the map */
+        .map {
+            height: 300px; /* Set height of the map */
             width: 100%; /* Set width of the map */
+            margin-top: 10px; /* Add margin for spacing */
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBePghG20-wfUWPBV72MH_s6fUe-Z4N7Jo&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBePghG20-wfUWPBV72MH_s6fUe-Z4N7Jo"></script>
 </head>
 <body>
     <h1 id="page-title">Available Jobs as at <span class="timestamp" id="current-datetime"></span></h1>
     <div id="jobs-list"></div>
-    <div id="map"></div>
 
     <script>
         // Function to format the date as DD/MM/YYYY
@@ -77,7 +77,24 @@
                         <strong>Contact:</strong> ${job.phone}<br>
                         <strong>Time Posted:</strong> ${formattedTimestamp}<br>
                         <button class="chat-button" onclick="window.open('https://wa.me/${phoneInternational}', '_blank')">Chat Now</button>
+                        <div class="map" id="map-${job.timestamp.replace(/:/g, "-")}"></div> <!-- Unique ID for each map -->
                     </li><hr>`;
+
+                    // Initialize the map for this job
+                    jobListHtml += `<script>
+                        function initMap() {
+                            const location = { lat: ${job.latitude}, lng: ${job.longitude} };
+                            const map = new google.maps.Map(document.getElementById('map-${job.timestamp.replace(/:/g, "-")}'), {
+                                zoom: 15,
+                                center: location,
+                            });
+                            new google.maps.Marker({
+                                position: location,
+                                map: map,
+                            });
+                        }
+                        initMap();
+                    <\/script>`;
                 });
                 jobListHtml += '</ul>';
                 document.getElementById('jobs-list').innerHTML = jobListHtml;
@@ -117,15 +134,6 @@
                 console.error('Error checking authorization:', error);
                 window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
             }
-        }
-
-        // Function to initialize the map
-        function initMap() {
-            const mapOptions = {
-                center: { lat: -1.286389, lng: 36.817223 }, // Change this to your desired coordinates
-                zoom: 10,
-            };
-            const map = new google.maps.Map(document.getElementById("map"), mapOptions);
         }
 
         // Check authorization on page load
