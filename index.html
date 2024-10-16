@@ -85,7 +85,11 @@
 
                 // Initialize maps after the job list is displayed
                 jobDetails.forEach((job, index) => {
-                    initMap(job.latitude, job.longitude, index);
+                    if (job.latitude && job.longitude) {
+                        initMap(job.latitude, job.longitude, index);
+                    } else {
+                        console.error(`Missing latitude/longitude for job: ${job.job_title}`);
+                    }
                 });
 
             } catch (error) {
@@ -128,7 +132,7 @@
 
         // Function to initialize the map for each job
         function initMap(latitude, longitude, index) {
-            const location = { lat: latitude, lng: longitude };
+            const location = { lat: parseFloat(latitude), lng: parseFloat(longitude) }; // Ensure lat/lng are numbers
             const map = new google.maps.Map(document.getElementById(`map-${index}`), {
                 zoom: 15,
                 center: location,
