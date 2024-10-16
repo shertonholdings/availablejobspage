@@ -25,6 +25,10 @@
             width: 100%; /* Set width of the map */
             margin-top: 10px;
         }
+        .total-payment {
+            color: red; /* Set text color to red */
+            font-weight: bold; /* Make text bold */
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBePghG20-wfUWPBV72MH_s6fUe-Z4N7Jo&callback=initMap" async defer></script>
 </head>
@@ -96,7 +100,7 @@
                         <strong>Job Group:</strong> ${job.job_title}<br> <!-- Updated to show Job Group -->
                         <strong>Job Description:</strong> ${job.job_description}<br>
                         <strong>Expected Hours:</strong> ${job.expected_hours}<br>
-                        <strong>Total Payment(Ksh.):</strong> ${totalPayment.toFixed(2)}<br> <!-- Display Total Payment -->
+                        <strong class="total-payment">Total Payment (Ksh.):</strong> <span class="total-payment">${totalPayment.toFixed(2)}</span><br> <!-- Display Total Payment in red and bold -->
                         <strong>City:</strong> ${job.city}<br>
                         <strong>Town:</strong> ${job.town}<br>
                         <strong>Street:</strong> ${job.street}<br>
