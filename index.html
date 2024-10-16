@@ -23,10 +23,10 @@
         .map {
             height: 300px; /* Set height of the map */
             width: 100%; /* Set width of the map */
-            margin-top: 10px; /* Add margin for spacing */
+            margin-top: 10px;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBePghG20-wfUWPBV72MH_s6fUe-Z4N7Jo"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBePghG20-wfUWPBV72MH_s6fUe-Z4N7Jo&callback=initMap" async defer></script>
 </head>
 <body>
     <h1 id="page-title">Available Jobs as at <span class="timestamp" id="current-datetime"></span></h1>
@@ -61,7 +61,7 @@
 
                 // Display the job details
                 let jobListHtml = '<ul>';
-                jobDetails.forEach(job => {
+                jobDetails.forEach((job, index) => {
                     const timePosted = new Date(job.timestamp);
                     const formattedTimestamp = formatDate(timePosted) + ', ' + timePosted.toLocaleTimeString();
                     const phoneInternational = job.phone.replace(/^0/, '254');
@@ -77,27 +77,17 @@
                         <strong>Contact:</strong> ${job.phone}<br>
                         <strong>Time Posted:</strong> ${formattedTimestamp}<br>
                         <button class="chat-button" onclick="window.open('https://wa.me/${phoneInternational}', '_blank')">Chat Now</button>
-                        <div class="map" id="map-${job.timestamp.replace(/:/g, "-")}"></div> <!-- Unique ID for each map -->
+                        <div class="map" id="map-${index}"></div> <!-- Unique ID for each map -->
                     </li><hr>`;
-
-                    // Initialize the map for this job
-                    jobListHtml += `<script>
-                        function initMap() {
-                            const location = { lat: ${job.latitude}, lng: ${job.longitude} };
-                            const map = new google.maps.Map(document.getElementById('map-${job.timestamp.replace(/:/g, "-")}'), {
-                                zoom: 15,
-                                center: location,
-                            });
-                            new google.maps.Marker({
-                                position: location,
-                                map: map,
-                            });
-                        }
-                        initMap();
-                    <\/script>`;
                 });
                 jobListHtml += '</ul>';
                 document.getElementById('jobs-list').innerHTML = jobListHtml;
+
+                // Initialize maps after the job list is displayed
+                jobDetails.forEach((job, index) => {
+                    initMap(job.latitude, job.longitude, index);
+                });
+
             } catch (error) {
                 console.error('Error fetching Gist data:', error);
             }
@@ -134,6 +124,19 @@
                 console.error('Error checking authorization:', error);
                 window.location.href = 'https://shertonholdings.github.io/availableopportunities/';
             }
+        }
+
+        // Function to initialize the map for each job
+        function initMap(latitude, longitude, index) {
+            const location = { lat: latitude, lng: longitude };
+            const map = new google.maps.Map(document.getElementById(`map-${index}`), {
+                zoom: 15,
+                center: location,
+            });
+            new google.maps.Marker({
+                position: location,
+                map: map,
+            });
         }
 
         // Check authorization on page load
