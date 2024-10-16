@@ -61,6 +61,7 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 jobGroups = JSON.parse(data.files['jobgroups.json'].content); // Adjust the file name if needed
+                console.log('Job Groups:', jobGroups); // Debugging output
             } catch (error) {
                 console.error('Error fetching job groups:', error);
             }
@@ -85,8 +86,11 @@
                     const phoneInternational = job.phone.replace(/^0/, '254');
 
                     // Get the hourly rate based on the job title (which is now the job group)
-                    const hourlyRate = jobGroups[job.job_title] || 0; // Use job.job_title for lookup
-                    const totalPayment = hourlyRate * job.expected_hours;
+                    const hourlyRate = jobGroups[job.job_title]; // Ensure job_title is A, B, C, etc.
+                    const totalPayment = hourlyRate ? hourlyRate * job.expected_hours : 0; // Calculate total payment
+
+                    // Debugging output to see values
+                    console.log(`Job Group: ${job.job_title}, Hourly Rate: ${hourlyRate}, Expected Hours: ${job.expected_hours}, Total Payment: ${totalPayment}`);
 
                     jobListHtml += `<li>
                         <strong>Job Group:</strong> ${job.job_title}<br> <!-- Updated to show Job Group -->
